@@ -9,15 +9,21 @@ containWord={}
 docList=[]
 totDoc=0
 
+from sklearn import feature_extraction
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import CountVectorizer
+
 class Document:
     tf={}
     tfidf={}
     totWord=0
+    filePath=""
 
-    def __init__(self,words,tot):
+    def __init__(self,words,tot,fpath):
         self.tf=words
         self.totWord=tot
         self.tfidf={}
+        self.filePath=fpath
 
     def calTFIDF(self):
         global totDoc,containWord
@@ -29,11 +35,12 @@ class Document:
                 self.tfidf[key]= math.log(totDoc/1)
             self.tfidf[key]*=self.tf[key]
 
-    def printHighest10(self):
+    def printHighest(self):
         print("================================")
+        print(self.filePath)
         print(self.totWord)
         ans=sorted(self.tfidf.items(),key=lambda d:d[1])
-        for i in range(10):
+        for i in range(30):
             print(ans[i])
         print("================================")
 
@@ -60,7 +67,7 @@ def readFile(fpath,cate="whole paper"):
                     containWord[j]+=1
                     flag=1
                 tot+=1
-        docList.append(Document(wd,tot))
+        docList.append(Document(wd,tot,fpath))
         utf8Cnt+=1
         f.close()
     except UnicodeDecodeError:
@@ -80,12 +87,24 @@ def readFile(fpath,cate="whole paper"):
                     containWord[j]+=1
                     flag=1
                 tot+=1
-        docList.append(Document(wd, tot))
+        docList.append(Document(wd, tot,fpath))
         ansiCnt+=1
         f.close()
 
 
+class res:
+    txt=""
+    value=0
+
+    def __init__(self,txt,val):
+        self.txt=txt
+        self.value=val
+
+test=["1.txt","2.txt","3.txt","4.txt","5.txt","6.txt","7.txt","8.txt","9.txt","10.txt"]
+
 if __name__=="__main__":
+    cor=[]
+    nameList=[]
     flist=listdir()
     for i in flist:
         if path.isdir(i) and i in corpusDir:
@@ -96,14 +115,72 @@ if __name__=="__main__":
                 if path.isdir(cPath) and j=='whole paper':
                     print("Read data from " + cPath)
                     for k in listdir(cPath):
+                        if k not in test:
+                            continue
                         fPath=path.join(cPath,k)
                         if path.isfile(fPath):
-                            readFile(fPath,j)
-    print("Utf8 file:"+str(utf8Cnt))
-    print("ansi file:"+str(ansiCnt))
+                            totDoc += 1
+                            flag = 0
+                            try:
+                                f = open(fPath, mode='r', encoding='utf8')
+                                stmp=""
+                                for i in f.readlines():
+                                    stmp+=" "
+                                    stmp+=i
+                                cor.append(stmp)
+                                nameList.append(fPath)
+                                utf8Cnt += 1
+                                f.close()
+                            except UnicodeDecodeError:
+                                f = open(fPath, mode='r', encoding='ansi')
+                                stmp=""
+                                for i in f.readlines():
+                                    stmp+=" "
+                                    stmp+=i
+                                cor.append(stmp)
+                                utf8Cnt += 1
+                                nameList.append(fPath)
+                                f.close()
 
-    ans={}
-    for i in docList:
-        i.calTFIDF()
-        #print(i.totWord)
-        i.printHighest10()
+    vectorizer=CountVectorizer()
+    transformer=TfidfTransformer()
+    tfidf=transformer.fit_transform(vectorizer.fit_transform(cor))
+    word=vectorizer.get_feature_names()
+    weight=tfidf.toarray()
+
+    cnt=0
+    for i in range(len(weight)):
+        print("---------------------------------------------------------------")
+        print(nameList[cnt])
+        cnt+=1
+        resList = []
+
+        for j in range(len(word)):
+            resList.append(res(word[j],weight[i][j]))
+        ans=sorted(resList,key=lambda d:d.value,reverse=True)
+
+
+        for j in range(20):
+            print(str(ans[j].txt)+" "+str(ans[j].value))
+
+    # flist=listdir()
+    # for i in flist:
+    #     if path.isdir(i) and i in corpusDir:
+    #         corpusPath=path.join(getcwd(),i)
+    #         clist=listdir(corpusPath)
+    #         for j in clist:
+    #             cPath=path.join(corpusPath,j)
+    #             if path.isdir(cPath) and j=='whole paper':
+    #                 print("Read data from " + cPath)
+    #                 for k in listdir(cPath):
+    #                     fPath=path.join(cPath,k)
+    #                     if path.isfile(fPath):
+    #                         readFile(fPath,j)
+    # print("Utf8 file:"+str(utf8Cnt))
+    # print("ansi file:"+str(ansiCnt))
+    #
+    # ans={}
+    # print(len(docList))
+    # for i in range(10):
+    #     docList[i].calTFIDF()
+    #     docList[i].printHighest()
