@@ -10,11 +10,6 @@ containWord={}
 docList=[]
 totDoc=0
 
-from sklearn import feature_extraction
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.feature_extraction.text import CountVectorizer
-
-
 finResult=[]
 
 class Result:
@@ -99,30 +94,79 @@ def readFile(fpath,cate="whole paper"):
         utf8Cnt+=1
         f.close()
     except UnicodeDecodeError:
-        f=open(fpath,mode='r',encoding='ANSI')
-        tot = 0
-        for i in f.readlines():
-            for j in i.split():
-                stmp=processStr(j)
-                if stmp=='':
-                    continue 
+        try:
+            print("try gbk")
+            with open(fpath,mode='r',encoding='gbk') as f:
+                tot = 0
+                for i in f.readlines():
+                    for j in i.split():
+                        stmp=processStr(j)
+                        if stmp=='':
+                            continue 
 
-                if stmp!='' and stmp in wd:
-                    wd[stmp]+=1
-                elif stmp!='' and stmp not in wd:
-                    wd[stmp]=1
+                        if stmp!='' and stmp in wd:
+                            wd[stmp]+=1
+                        elif stmp!='' and stmp not in wd:
+                            wd[stmp]=1
 
-                if stmp not in flag:
-                    if stmp not in containWord:
-                        containWord[stmp]=1
-                    else:                    
-                        containWord[stmp]+=1
-                    flag.append(stmp)
-                tot+=1
-        docList.append(Document(wd, tot,fpath))
-        ansiCnt+=1
-        f.close()
+                        if stmp not in flag:
+                            if stmp not in containWord:
+                                containWord[stmp]=1
+                            else:                    
+                                containWord[stmp]+=1
+                            flag.append(stmp)
+                        tot+=1
+                docList.append(Document(wd, tot,fpath))
+                ansiCnt+=1
+        except UnicodeDecodeError:
+            try:
+                print("try utf-16")
+                with open(fpath,mode='r',encoding='utf-16') as f:
+                    tot = 0
+                    for i in f.readlines():
+                        for j in i.split():
+                            stmp=processStr(j)
+                            if stmp=='':
+                                continue 
 
+                            if stmp!='' and stmp in wd:
+                                wd[stmp]+=1
+                            elif stmp!='' and stmp not in wd:
+                                wd[stmp]=1
+
+                            if stmp not in flag:
+                                if stmp not in containWord:
+                                    containWord[stmp]=1
+                                else:                    
+                                    containWord[stmp]+=1
+                                flag.append(stmp)
+                            tot+=1
+                    docList.append(Document(wd, tot,fpath))
+                    ansiCnt+=1
+            except UnicodeError:
+                print("try iso-8859-15")
+                with open(fpath,mode='r',encoding='iso-8859-15') as f:
+                    tot = 0
+                    for i in f.readlines():
+                        for j in i.split():
+                            stmp=processStr(j)
+                            if stmp=='':
+                                continue 
+
+                            if stmp!='' and stmp in wd:
+                                wd[stmp]+=1
+                            elif stmp!='' and stmp not in wd:
+                                wd[stmp]=1
+
+                            if stmp not in flag:
+                                if stmp not in containWord:
+                                    containWord[stmp]=1
+                                else:                    
+                                    containWord[stmp]+=1
+                                flag.append(stmp)
+                            tot+=1
+                    docList.append(Document(wd, tot,fpath))
+                    ansiCnt+=1
 
 class res:
     txt=""
@@ -132,69 +176,10 @@ class res:
         self.txt=txt
         self.value=val
 
-test=["1.txt","2.txt","3.txt","4.txt","5.txt","6.txt","7.txt","8.txt","9.txt","10.txt"]
+test=["1.txt","2.txt","3.txt","4.txt","5.txt","6.txt","7.txt","8.txt","9.txt","79.txt"]
 stwList=[]
 
 if __name__=="__main__":
-    # cor=[]
-    # nameList=[]
-    # flist=listdir()
-    # for i in flist:
-    #     if path.isdir(i) and i in corpusDir:
-    #         corpusPath=path.join(getcwd(),i)
-    #         clist=listdir(corpusPath)
-    #         for j in clist:
-    #             cPath=path.join(corpusPath,j)
-    #             if path.isdir(cPath) and j=='whole paper':
-    #                 print("Read data from " + cPath)
-    #                 for k in listdir(cPath):
-    #                     if k not in test:
-    #                         continue
-    #                     fPath=path.join(cPath,k)
-    #                     if path.isfile(fPath):
-    #                         totDoc += 1
-    #                         flag = 0
-    #                         try:
-    #                             f = open(fPath, mode='r', encoding='utf8')
-    #                             stmp=""
-    #                             for i in f.readlines():
-    #                                 stmp+=" "
-    #                                 stmp+=i
-    #                             cor.append(stmp)
-    #                             nameList.append(fPath)
-    #                             utf8Cnt += 1
-    #                             f.close()
-    #                         except UnicodeDecodeError:
-    #                             f = open(fPath, mode='r', encoding='ansi')
-    #                             stmp=""
-    #                             for i in f.readlines():
-    #                                 stmp+=" "
-    #                                 stmp+=i
-    #                             cor.append(stmp)
-    #                             utf8Cnt += 1
-    #                             nameList.append(fPath)
-    #                             f.close()
-
-    # vectorizer=CountVectorizer()
-    # transformer=TfidfTransformer()
-    # tfidf=transformer.fit_transform(vectorizer.fit_transform(cor))
-    # word=vectorizer.get_feature_names()
-    # weight=tfidf.toarray()
-
-    # cnt=0
-    # for i in range(len(weight)):
-    #     print("---------------------------------------------------------------")
-    #     print(nameList[cnt])
-    #     cnt+=1
-    #     resList = []
-
-    #     for j in range(len(word)):
-    #         resList.append(res(word[j],weight[i][j]))
-    #     ans=sorted(resList,key=lambda d:d.value,reverse=True)
-
-
-    #     for j in range(20):
-    #         print(str(ans[j].txt)+" "+str(ans[j].value))
     fs=open("stopwords.txt","r")
     for i in fs.readlines():
         stwList.append(i)
@@ -210,8 +195,8 @@ if __name__=="__main__":
                 if path.isdir(cPath) and j=='whole paper':
                     print("Read data from " + cPath)
                     for k in listdir(cPath):
-                     #   if k not in test:
-                      #      continue
+                        if k not in test:
+                           continue
                         fPath=path.join(cPath,k)
                         if path.isfile(fPath):
                             readFile(fPath,j)
