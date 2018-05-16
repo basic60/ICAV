@@ -15,3 +15,4 @@ for i in listdir():
                     filePath=path.join(ftmp,k)
                     if path.isfile(filePath):
                         ctr.addPaper(filePath)
+
