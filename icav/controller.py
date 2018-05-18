@@ -1,20 +1,22 @@
 from .tfidf import tfidf
 
 class Controller:
+    def __init__(self):
+        self.tfctr=tfidf()
+
     def __processWord(self,s):
         slist=list(s)
         ret=""
         for i in range(len(slist)):
-            if s[i]>='a' and s[i]<='z' or s[i]>='A' and s[i]<='Z':
+            if s[i]>='a' and s[i]<='z' or s[i]>='A' and s[i]<='Z' or i=='-':
                 ret+=s[i]
         return ret.lower()
 
     def __proceePaper(self,val):
-        tfctr=tfidf()
+        wlist=[]
         for line in val:
-            wlist=list(filter(lambda x:x!='',[self.__processWord(i) for i in line.split(' ')]))
-            tfctr.addPaper(wlist)
-        tfctr.calTFIDF()
+            wlist.extend(list(filter(lambda x:x!='',[self.__processWord(i) for i in line.split(' ')])))
+        self.tfctr.addPaper(wlist,self.curPath)
 
     def addPaper(self,fpath):
         print("Start process: "+fpath)
@@ -41,3 +43,7 @@ class Controller:
                         x=f.readlines()
                         print('The encoding of this file is: iso-8859-15')
                         self.__proceePaper(x)
+    
+    def calculate(self):
+        self.tfctr.calTFIDF()
+
