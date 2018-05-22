@@ -57,7 +57,6 @@ class tfidf:
                 tfidf=tf*idf
                 pipe.zadd("tfidf",_generateKey(pid.fpath)+":"+wd,tfidf)
                 pipe.zadd("entropy",_generateKey(pid.fpath)+":"+wd,-1*tf*math.log(tf,2))
-                
         pipe.execute()
 
 
