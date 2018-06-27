@@ -7,11 +7,10 @@ import redis
 
 corpusDir=['1','2','3']
 category=['whole paper']
-command=0
+command=2
 
 if command==0:
     ctr=Controller()
-
     r=redis.Redis("127.0.0.1",'6379',decode_responses=True)
     if not r.exists("tfidf"):
         for i in listdir():
@@ -28,7 +27,7 @@ if command==0:
         print("Adding corpus finished! Starting process...")
         ctr.calculate()
     print("Finished!")
-else:
+elif command==1:
     print("Start traning model!")               
     label=[]
     vector=[]
@@ -90,4 +89,38 @@ else:
     print(p_label)
     print(p_val)
     print("=====================")
-    
+else:
+    r=redis.Redis("127.0.0.1",'6379',decode_responses=True)
+    for i in listdir():
+        if path.isdir(i) and i in corpusDir:
+            ptmp=path.join(getcwd(),i)
+            print(ptmp)
+            for j in listdir(ptmp):
+                ftmp=path.join(ptmp,j)   
+                if path.isdir(ftmp) and j in category:
+                    for k in listdir(ftmp):
+                        if '_' in k:
+                            filePath=path.join(ftmp,k)
+                            with open(filePath,'r',encoding='gbk') as f:
+                                for lines in f.readlines():
+                                    wd=lines.split(' ')
+
+                                    def __processWord(s):
+                                        slist=list(s)
+                                        ret=""
+                                        for ii in range(len(slist)):
+                                            if s[ii]>='a' and s[ii]<='z' or s[ii]>='A' and s[ii]<='Z' or ii=='-':
+                                                ret+=s[ii]
+                                            else:
+                                                return ''
+                                        if len(ret)<3:
+                                            return ''
+                                        return ret.lower()
+                                    wd=list(filter(lambda x:x!='',[__processWord(i) for i in wd]))                                    
+                                    if len(wd)==1:
+                                        print(wd)
+                                        ret=r.zscore("tfidf",str(i)+':'+k.split('_')[0]+":.txt:"+wd[0])
+                                        if ret and ret>0.001:
+                                            print(wd[0])
+                                    elif len(wd)>1:
+                                        print(wd)
