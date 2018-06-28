@@ -4,9 +4,11 @@ from libsvm.python.svmutil import *
 from libsvm.python.svm import *
 import matplotlib.pyplot as plt
 import redis
+from icav.reader import Reader
 
-corpusDir=['1','2','3']
+corpusDir=['1']
 category=['whole paper']
+limit=['1_1.txt']
 command=2
 
 if command==0:
@@ -94,33 +96,55 @@ else:
     for i in listdir():
         if path.isdir(i) and i in corpusDir:
             ptmp=path.join(getcwd(),i)
-            print(ptmp)
             for j in listdir(ptmp):
                 ftmp=path.join(ptmp,j)   
                 if path.isdir(ftmp) and j in category:
                     for k in listdir(ftmp):
                         if '_' in k:
-                            filePath=path.join(ftmp,k)
-                            with open(filePath,'r',encoding='gbk') as f:
-                                for lines in f.readlines():
-                                    wd=lines.split(' ')
+                            if k not in limit:
+                                continue
 
-                                    def __processWord(s):
-                                        slist=list(s)
-                                        ret=""
-                                        for ii in range(len(slist)):
-                                            if s[ii]>='a' and s[ii]<='z' or s[ii]>='A' and s[ii]<='Z' or ii=='-':
-                                                ret+=s[ii]
-                                            else:
-                                                return ''
-                                        if len(ret)<3:
+                            filePath=path.join(ftmp,k)
+                            rd=Reader()
+                            for lines in rd.readlines(filePath):
+                                wd=lines.split(' ')
+
+                                def __processWord(s):
+                                    slist=list(s)
+                                    ret=""
+                                    for ii in range(len(slist)):
+                                        if s[ii]>='a' and s[ii]<='z' or s[ii]>='A' and s[ii]<='Z' or s[ii]=='-':
+                                            ret+=s[ii]
+                                        elif s[ii]=='\n':
+                                            pass
+                                        else:
                                             return ''
-                                        return ret.lower()
-                                    wd=list(filter(lambda x:x!='',[__processWord(i) for i in wd]))                                    
-                                    if len(wd)==1:
-                                        print(wd)
-                                        ret=r.zscore("tfidf",str(i)+':'+k.split('_')[0]+":.txt:"+wd[0])
-                                        if ret and ret>0.001:
-                                            print(wd[0])
-                                    elif len(wd)>1:
-                                        print(wd)
+                                    if len(ret)<2:
+                                        return ''
+                                    return ret
+                                
+                                # print(wd)
+                                wd=list(filter(lambda x:x!='',[__processWord(i) for i in wd]))   
+                                # print(wd)
+
+                                cnt=0
+                                for item in wd:
+                                    if r.zrank('person_name',item)!=None:
+                                        cnt+=1
+                                if cnt==len(wd):
+                                    continue
+                                
+
+
+                                if len(wd)==1:
+                                    query=str(i)+':'+k.split('_')[0]+".txt:"+wd[0].lower()
+                                    # print(query)
+                                    ret=r.zscore("tfidf",query)
+                                    # print(wd[0]+" ret:"+str(ret))
+                                    if ret and ret>0.001:
+                                        print(wd[0])
+                                        pass
+                                elif len(wd)>1:
+                                    for item in wd:
+                                        print(item,end=' ')
+                                    print()
