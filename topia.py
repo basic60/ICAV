@@ -1,4 +1,7 @@
 #!/usr/bin/python
+import sys
+reload(sys)
+sys.setdefaultencoding('utf-8')
 from topia.termextract import extract
 from os import listdir,path,getcwd,remove
 corpusDir=['1','2','3']
@@ -27,7 +30,7 @@ for i in listdir(getcwd()):
                     ans=extractor(ans)
                     f2name=str(k).split('.')[0]+'_'+str(k).split('.')[0]+".txt"
                     with open(path.join(ftmp,f2name),mode='w') as f:
-                        f.writelines([i[0]+'\n' for i in ans])
+                        f.writelines([i[0]+'\n'for i in ans])
 
 
 

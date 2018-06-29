@@ -123,9 +123,9 @@ else:
                                         return ''
                                     return ret
                                 
-                                # print(wd)
+                                print(wd)
                                 wd=list(filter(lambda x:x!='',[__processWord(i) for i in wd]))   
-                                # print(wd)
+                                print(wd)
 
                                 cnt=0
                                 for item in wd:
@@ -133,8 +133,6 @@ else:
                                         cnt+=1
                                 if cnt==len(wd):
                                     continue
-                                
-
 
                                 if len(wd)==1:
                                     query=str(i)+':'+k.split('_')[0]+".txt:"+wd[0].lower()
