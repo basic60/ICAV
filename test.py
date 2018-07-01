@@ -123,9 +123,9 @@ else:
                                         return ''
                                     return ret
                                 
-                                print(wd)
+                                # print(wd)
                                 wd=list(filter(lambda x:x!='',[__processWord(i) for i in wd]))   
-                                print(wd)
+                                # print(wd)
 
                                 cnt=0
                                 for item in wd:

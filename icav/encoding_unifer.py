@@ -1,19 +1,19 @@
 from .reader import Reader
-from os import listdir,path,getcwd
+from os import listdir,path,getcwd,walk
 import queue
-def unify_encoding(dirPath):
+
+def unify_encoding(targetPath):
     r=Reader()
-    q=queue.Queue()
-    [q.put(i) for i in listdir(dirPath)]
-    cpath=getcwd()
-    while not q.empty():
-        x=q.get()
-        if path.isfile(x):
-            lines=r.readlines(x)
-            with open(x,'w') as f:
-                f.writelines(lines)
-        else:
-            nxtPath=path.join(x,)
+    for dirPath,dirName,fileName in walk(targetPath):
+        if fileName!=[]:
+            for i in fileName:
+                finPath=path.join(dirPath,i)
+                lines=r.readlines(finPath)
+                with open(finPath,'w') as f:
+                    f.writelines(lines)
+
+
+
 
 
             
