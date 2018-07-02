@@ -1,4 +1,5 @@
 from .tfidf import tfidf
+from .reader import Reader
 
 class Controller:
     def __init__(self):
@@ -20,29 +21,11 @@ class Controller:
 
     def addPaper(self,fpath):
         print("Start process: "+fpath)
+        rd=Reader()
         self.curPath=fpath
-        try:
-            with open(fpath,mode='r',encoding='utf8') as f:
-                x=f.readlines()
-                print('The encoding of this file is: uft-8')
-                self.__proceePaper(x)
-        except UnicodeDecodeError:
-            try:
-                with open(fpath,mode='r',encoding='gbk') as f:
-                    x=f.readlines()
-                    print('The encoding of this file is: gbk')
-                    self.__proceePaper(x)
-            except UnicodeDecodeError:
-                try:
-                    with open(fpath,mode='r',encoding='utf-16') as f:
-                        x=f.readlines()
-                        print('The encoding of this file is: utf-16')
-                        self.__proceePaper(x)
-                except UnicodeError:
-                    with open(fpath,mode='r',encoding='iso-8859-15') as f:
-                        x=f.readlines()
-                        print('The encoding of this file is: iso-8859-15')
-                        self.__proceePaper(x)
+
+        x=rd.readlines(fpath)
+        self.__proceePaper(x)
     
     def calculate(self):
         self.tfctr.calTFIDF()
